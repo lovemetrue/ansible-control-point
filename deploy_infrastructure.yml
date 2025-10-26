@@ -1,0 +1,90 @@
+---
+- name: Deploy and configure web servers
+  hosts: webservers
+  become: yes
+  vars:
+    web_port: "{{ web_port | default(80) }}"
+    document_root: "{{ document_root | default('/var/www/html') }}"
+  
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+      tags: update
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+      tags: install
+
+    - name: Ensure web directory exists
+      file:
+        path: "{{ document_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+      tags: setup
+
+    - name: Create basic index page
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Ansible Deployment - {{ ansible_hostname }}</title>
+          </head>
+          <body>
+              <h1>Welcome to Ansible Automated Deployment</h1>
+              <p>Server: {{ ansible_hostname }}</p>
+              <p>Deployed automatically with Ansible</p>
+          </body>
+          </html>
+        dest: "{{ document_root }}/index.html"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+      tags: content
+
+    - name: Ensure Nginx service is running
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      tags: service
+
+- name: Deploy and configure database servers
+  hosts: dbservers
+  become: yes
+  vars:
+    db_name: "{{ db_name | default('student_db') }}"
+    db_user: "{{ db_user | default('student_user') }}"
+    db_password: "{{ db_password | default('student123') }}"
+
+  tasks:
+    - name: Install PostgreSQL
+      apt:
+        name: postgresql
+        state: latest
+      tags: install
+
+    - name: Ensure PostgreSQL service is running
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+      tags: service
+
+    - name: Create database
+      postgresql_db:
+        name: "{{ db_name }}"
+      tags: db_setup
+
+    - name: Create database user
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        db: "{{ db_name }}"
+        priv: "ALL"
+      tags: db_setup
