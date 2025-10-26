@@ -1,6 +1,5 @@
-Проверочные ad-hoc команды:
+### Проверочные ad-hoc команды:
 
-bash
 ### 1. Проверка связи со всеми хостами
 ```ansible all -i inventory.ini -m ping```
 
@@ -17,7 +16,7 @@ bash
 ```ansible dbservers -i inventory.ini -a "sudo -u postgres psql -c '\l'" -b```
 Демонстрация идемпотентности:
 
-bash
+
 ### Первый запуск - должны быть изменения (желтый CHANGED)
 ```ansible-playbook -i inventory.ini deploy_infrastructure.yml```
 
@@ -25,7 +24,7 @@ bash
 ```ansible-playbook -i inventory.ini deploy_infrastructure.yml```
 Инструменты отладки:
 
-bash
+
 ### Предварительный просмотр изменений
 ```ansible-playbook -i inventory.ini deploy_infrastructure.yml --check```
 
@@ -38,7 +37,7 @@ bash
 
 
 ### Проверка веб-сервера
-curl http://192.168.1.10
+```curl http://192.168.1.10```
 
 ### Проверка базы данных
 
